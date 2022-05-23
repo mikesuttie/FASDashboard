@@ -1,0 +1,19 @@
+Obtain new processing token [string] (GET method):
+	curl -X GET http://localhost:34568/faceScreen/processor/
+
+For the following, assume the processingToken returned is "2".
+
+
+Upload obj file (PUT method):
+	curl -T head.obj http://localhost:34568/faceScreen/processor/objFile?processingToken=2
+
+Upload landmarks file faceLandmarks.json [JSON] (POST method):
+	curl -H "Content-Type: application/json" --data @faceLandmarks.json http://localhost:34568/faceScreen/processor/landmarks?processingToken=2
+
+Get heatmap image (GET method):
+	curl -X GET http://localhost:34568/faceScreen/processor/heatmap?processingToken=2
+
+	(ethnicity)
+	
+	
+	

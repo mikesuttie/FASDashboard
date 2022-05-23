@@ -1,0 +1,18 @@
+Backing up and restoring container with postgresDB volume (also see https://stackoverflow.com/questions/24718706/backup-restore-a-dockerized-postgresql-database):
+
+
+
+(base) r@R:~/fasd/repos/fasdDashboard$ docker ps
+CONTAINER ID   IMAGE                  COMMAND                  CREATED        STATUS       PORTS                                           NAMES
+dca7e0a87625   fasddashboard_server   "uvicorn app.api.ser…"   6 weeks ago    Up 3 hours   0.0.0.0:8000->8000/tcp, :::8000->8000/tcp       fasddashboard_server_1
+a2c53d64d274   fsprocessor            "./faceScreenServer …"   6 weeks ago    Up 3 hours   0.0.0.0:34568->34568/tcp, :::34568->34568/tcp   fasddashboard_facescreenprocessor_1
+9c254da36403   postgres:13-alpine     "docker-entrypoint.s…"   3 months ago   Up 3 hours   0.0.0.0:18088->5432/tcp, :::18088->5432/tcp     fasddashboard_db_1
+(base) rr@RRP:~/fasd/repos/fasdDashboard$ docker exec -t 9c254da36403 pg_dumpall -c -U postgres > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql
+
+
+
+
+Restore:
+
+
+cat your_dump.sql | docker exec -i your-db-container psql -U postgres

@@ -1,0 +1,48 @@
+{
+"modelDescriptors" : 
+    {
+
+    "CAUC": 
+        {
+        "Bellus16":
+            {
+            "unsplitModelsPath": "Caucasian16pts",
+            "splitModelsPath": "Caucasian16pts_splitModels"
+            },
+        "manual22":
+            {
+            "unsplitModelsPath": "CaucasianEarless",
+            "splitModelsPath": "notAvailable"
+            },
+        "BellusStereo":
+            {
+            "splitModelsPath": "weDontHaveThisYet"
+            }
+        },
+    "CAPEC":
+        {
+        "manual24":
+            {
+            "splitModelsPath": "notAvailable"
+            }
+        }
+    },
+
+"landmarkSetTypes" : 
+    {
+	"manual22" : ["right_upper_mid", "right_ex", "right_lower_mid", "right_en", "left_en", 
+                      "left_upper_mid", "left_ex", "left_lower_mid", "left_cupid", "lip_centre", 
+                      "right_cupid", "right_ch", "left_ch", "nasion", "gnathion", "left_alare", 
+                      "right_alare", "pronasale", "subnasale", "lower_right_ear_attachment", 
+                      "lower_left_ear_attachment", "lower_lip_centre"],
+
+	"manual24" : ["right_upper_mid", "right_ex", "right_lower_mid", "right_en", "left_en", 
+                      "left_upper_mid", "left_ex", "left_lower_mid", "left_cupid", "lip_centre", 
+                      "right_cupid", "right_ch", "left_ch", "nasion", "gnathion", "left_alare", 
+                      "right_alare", "pronasale", "subnasale", "lower_right_ear_attachment", 
+                      "lower_left_ear_attachment", "lower_lip_centre", "tragion_right", "tragion_left"],
+	"Bellus16" : ["right_ex", "right_en", "left_en", "left_ex", "left_cupid", "lip_centre", 
+                      "right_cupid", "right_ch", "left_ch", "nasion", "gnathion", "left_alare", 
+                      "right_alare", "pronasale", "subnasale", "lower_lip_centre"]
+    }
+}

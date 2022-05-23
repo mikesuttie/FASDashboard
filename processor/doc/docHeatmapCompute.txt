@@ -1,0 +1,40 @@
+IN void CFaceMarkDoc::OnCalculateNormaliseExample():
+	- vtkSmartPointer<vtkPolyData> surface = vtkSmartPointer<vtkPolyData>::New();
+	- this->CalcualateFacialSignature(current_example, surface);
+		
+IN void CFaceMarkDoc::CalcualateFacialSignature(int example, vtkSmartPointer<vtkPolyData> signature):
+	- check age
+	- if(!this->dsmloaded) this->OnCalculateLoaddsmmodel();
+	- new vtkSmartPointer<vtkDoubleArray> b;
+	- this->pca->GetApproximateShapeParameters(surface /*obj*/,landmarks, b,true);
+		- landmarks --> vtkPointSet
+		- b --> OUTPUT?
+		- true --> rigid_body
+		
+	- this->pca->GetParameterisedShape(b, signature);
+		- b --> INPUT
+		- signature --> shape (OUTPUT)
+		
+	- this->pca->GetParameterisedLandmarks(signature, landmarks);
+		- signature --> INPUT
+		- landmarks --> INPUT
+			(sets landmarks in vtkSurfacePCA object (=OUTPUT))
+			
+	- msNormalisationTools *norm = new msNormalisationTools();
+	
+	- norm->SetParams(this->pca, this->proj_fields, this->N_PROJ_EXAMPLES, this->N_PROJ_CLASSIFICATIONS);
+		- this->pca --> vtkSurfacePCA object
+		- this->proj_fields --> all the landmarks and metadata for all subjects
+		- this->N_PROJ_EXAMPLES --> number of subjects
+		- this->N_PROJ_CLASSIFICATIONS --> 
+		
+	- norm->CalculateMatchedMeanSignificance(signature, b, age ,n_ma, mm_background_class, mm_background_var,axes, which_axis, false)
+		- signature --> OUTPUT: vtkPolyData, the heatmap
+		- b --> vtkDoubleArray, "Shape parameters"?  --> perhaps not another OUTPUT
+		- age --> 
+		- n_ma --> 35 (mm_n)
+		- mm_background_class --> "Dx" (from_class)
+		- mm_background_var --> "control" (from_var)
+		- axes --> C3dVector(0,0,0)
+		- which_axis --> -1
+		- false --> do not write to file

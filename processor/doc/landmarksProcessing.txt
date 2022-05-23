@@ -1,0 +1,57 @@
+23/6/2020
+
+Some reasoning about the landmark REST API and related processing
+------------------------------------------------------------------
+
+Uploaded landmarks are required to compute facial signature and PFL measures.
+
+Depending on available landmarking data (manual annotations or computer vision results), different models have to be selected, as each models works with a specific set of landmarks. Model selection also depends on ethnicity.
+
+To check validity of landmarks, 3D facial geometry is required. 
+
+Therefore, following process is suggested:
+
+1) Upload 3D facial geometry, e.g., obj coded data.
+2) Upload set of landmarks and ethnicity. This data permits selecting a model, by first selecting all models with given ethnicity, and then checking that for this ethnicty there is a model that supports the exact set of landmarks. With the 3D geometry available, landmark sets with incorrectly placed landmarks (e.g, landmarks not on surface) can be rejected. This is beneficial to detect client errors, which may result in production of meaningless reports.
+
+
+The following metadata structure (json stored server-side at root of model data) describing available models may support the process:
+
+{
+    "modelDescriptors":
+    {
+    "<EthnicityCode1>": {
+                        "<landmarkSet1>": {
+                                            "unsplitModelsPath": "<path to unsplit models for EthnicityCode1",
+                                            "splitModelsPath": "<path to split models for EthnicityCode1",
+                                            "landmarkSet": landmarkSetTypeX
+                                          },
+                         ...
+                         ...
+                         ...
+                        "<landmarkSetQ>": . . .
+                        },
+     ...
+     ...
+     ...
+    "<EthnicityCodeN>":  . . .
+    },
+
+    "landmarkSetTypes" :
+    {
+      "<landmarkSetType1>": [<landmarkName1>, ... , <landmarkNameP_1>],
+       ...
+      "<landmarkSetTypeM>": [<landmarkName1>, ... , <landmarkNameP_O>],
+    }
+}
+
+Data at 'unsplitModelsPath' is used for computing heatmaps. Data at 'splitModelsPath' is used for classification.
+
+Integrity checking of the above schema includes:
+  - Checking each modelDescriptor and its landmark subsets refers to valid model data.
+  - Checking each EthnicityCode is unique.
+  
+
+PFL computations require some landmarks, and the process above appears wasteful if PFL computation is the only required action. However, in this case the client could also implement its own method, while the server provides only general statistics (e.g., growth charts) for the purpose of comparisons. 
+Offering an option to compute PFL measures on landmark subsets (without providing facial geometry) leads to complications in report generation.
+

@@ -1,0 +1,58 @@
+version: '3.3'
+
+services:
+
+  facescreenprocessor:
+    image: fsprocessor
+    build:
+      context: ./processor
+      dockerfile: Dockerfile
+    volumes:
+      - ./processor/:/processor/
+    tty: true   # Keep container alive.   
+    command: "./faceScreenServer 34568 modelDB.json http://127.0.0.1:"
+    ports:
+      - 34568:34568
+
+  landmarkingserver:
+    image: lmserver
+    build:
+      context: ./landmarker
+      dockerfile: Dockerfile
+    volumes:
+      - ./landmarker/:/landmarker/
+    command: " " # This string, for some reason, is concatenated to the Dockerfile ENTRYPOINT.
+    # tail -f /dev/null 
+    # bash -c "conda init bash && conda activate FasdLandmarker && uvicorn server:app --reload --workers 1 --host 0.0.0.0 --port 7998"
+        
+    env_file:
+      - ./landmarker/.env
+    ports:
+      - 7998:7998
+
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/:/backend/
+    command: uvicorn app.api.server:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    env_file:
+      - ./backend/.env
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - landmarkingserver
+      - facescreenprocessor
+
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./backend/.env
+    ports:
+      - 18088:5432
+volumes:
+    postgres_data:
