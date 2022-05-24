@@ -10,7 +10,7 @@ services:
     volumes:
       - ./processor/:/processor/
     tty: true   # Keep container alive.   
-    command: "./faceScreenServer 34568 modelDB.json http://127.0.0.1:"
+    command: "./faceScreenServer 34568 modelDB.json http://0.0.0.0:"
     ports:
       - 34568:34568
 
