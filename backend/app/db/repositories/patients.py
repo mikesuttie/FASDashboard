@@ -2,6 +2,7 @@ from typing import List
 
 from app.db.repositories.base import BaseRepository
 from app.models.patient import PatientCreate, PatientUpdate, PatientInDB
+from app.models.user import UserInDB
 
 CREATE_PATIENT_QUERY = """
     INSERT INTO patients (name, surname, dob, ethnicity, sex, owner)

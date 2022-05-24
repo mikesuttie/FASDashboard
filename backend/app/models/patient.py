@@ -1,8 +1,9 @@
 #from datetime import date, datetime
 import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 from enum import Enum
 from app.models.core import IDModelMixin, CoreModel
+from app.models.user import UserPublic
 
 class PatientSex(str, Enum):
     male = "male"
