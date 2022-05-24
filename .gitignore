@@ -5,7 +5,7 @@ landmarker/FasdLandmarker/data/subjects/
 processor/Caucasian16pts
 processor/Caucasian16pts_splitModels
 processor/faceScreenServer
-
+processor/vtksrc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
