@@ -6,20 +6,20 @@ from app.models.user import UserPublic
 from pydantic import Json
 
 class MeanClassificationBase(CoreModel):
-    signature_id: Optional[int]
+    landmark_id: Optional[int]
     meanvalue: Optional[float]
     stderror: Optional[float]    
 
 
 class MeanClassificationCreate(MeanClassificationBase):
-    signature_id: int
+    landmark_id: int
     meanvalue: float
     stderror: float    
 
 
 class MeanClassificationInDB(IDModelMixin, DateTimeModelMixin, MeanClassificationBase):
     id: Optional[int]
-    signature_id: Optional[int]
+    landmark_id: Optional[int]
     meanvalue: Optional[float]
     stderror: Optional[float]    
     owner: int
