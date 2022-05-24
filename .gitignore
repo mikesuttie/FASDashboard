@@ -1,3 +1,12 @@
+# Model files, large sizes
+landmarker/FasdLandmarker/data/models/dlib
+landmarker/FasdLandmarker/data/models/zeyuCNN
+landmarker/FasdLandmarker/data/subjects/
+processor/Caucasian16pts
+processor/Caucasian16pts_splitModels
+processor/faceScreenServer
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
