@@ -2,6 +2,8 @@
 landmarker/FasdLandmarker/data/models/dlib
 landmarker/FasdLandmarker/data/models/zeyuCNN
 landmarker/FasdLandmarker/data/subjects/
+landmarker/FasdLandmarker/*.png
+landmarker/FasdLandmarker/*.json
 processor/Caucasian16pts
 processor/Caucasian16pts_splitModels
 processor/faceScreenServer

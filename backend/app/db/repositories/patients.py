@@ -1,4 +1,6 @@
+from fastapi import HTTPException, status
 from typing import List
+from asyncpg.exceptions import ForeignKeyViolationError
 
 from app.db.repositories.base import BaseRepository
 from app.models.patient import PatientCreate, PatientUpdate, PatientInDB
@@ -13,7 +15,7 @@ CREATE_PATIENT_QUERY = """
 GET_ALL_PATIENTS_QUERY = """
     SELECT * 
     FROM patients
-    WHERE id = :id AND owner = :owner;
+    WHERE owner = :owner;
 """
 
 class PatientsRepository(BaseRepository):
@@ -22,12 +24,17 @@ class PatientsRepository(BaseRepository):
     async def create_patient(self, *, new_patient: PatientCreate, requesting_user: UserInDB) -> PatientInDB:
         query_values = new_patient.dict()
         query_values['owner'] = requesting_user.id
-        patient = await self.db.fetch_one(query=CREATE_PATIENT_QUERY, values=query_values)
+        try:
+            patient = await self.db.fetch_one(query=CREATE_PATIENT_QUERY, values=query_values)
+        except ForeignKeyViolationError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Ethnicity code of new patient unknown (Foreign key violation error).",
+            )        
+        
         return PatientInDB(**patient)
         
         
     async def get_all_patients(self, *, requesting_user: UserInDB) -> List[PatientInDB]:
-        query_values['owner'] = requesting_user.id    
-        allpatients = await self.db.fetch_all(query=GET_ALL_PATIENTS_QUERY)
+        allpatients = await self.db.fetch_all(query=GET_ALL_PATIENTS_QUERY, values={'owner':requesting_user.id})
         return [PatientInDB(**patient) for patient in allpatients]
     

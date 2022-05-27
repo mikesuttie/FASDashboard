@@ -1,4 +1,5 @@
 from typing import List
+from pydantic import Json
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, UploadFile, File#, Response
 from starlette.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
@@ -9,7 +10,17 @@ from app.api.dependencies.database import get_repository
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.signatures import get_signature_by_id_from_path, check_signature_modification_permissions
 
+import httpx
+
 router = APIRouter()
+
+@router.get("/", response_model=Json, name="signature:test-processing-server-connection")
+async def test_processing_server_connection(
+    #current_user: UserInDB = Depends(get_current_active_user),
+):
+    processingserver_response = httpx.get("http://facescreenprocessor:34568/faceScreen/processor/", timeout=1.0) # processingToken/ (don't leak a processing token through this unprotected route)
+    #print("Test: processingserver_response **************** " , processingserver_response, processingserver_response.text)
+    return processingserver_response
 
 
 @router.get("/{landmark_id}/", response_model=List[SignaturePublic], name="signature:get-signatures-by-landmark-id")
@@ -36,6 +47,24 @@ async def get_heatmap_by_signature_id(
     if heatmap_mesh_data is None or len(heatmap_mesh_data.heatmap)==0:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="No heatmap available under this signature id.")
     return heatmap_mesh_data.heatmap
+
+
+# Route for testing heatmap computation invoked through Open API; results written into DB.
+@router.post("/compute/{landmark_id}/", response_model=int, name="signature:compute", status_code=HTTP_201_CREATED)
+async def signature_create(
+    signaturemodel_name: str = "CAUC16pt",
+    facialregion_code: str = "FACE", 
+    landmark_id: int = Path(..., ge=1, title="Landmark ID."),   
+    current_user: UserInDB = Depends(get_current_active_user),
+    signature_repo: SignatureRepository = Depends(get_repository(SignatureRepository)),
+):
+
+    
+    insertedSignatureRecordID = await signature_repo.compute_signature(landmark_id = landmark_id, 
+                                                                       signaturemodel_name = signaturemodel_name, 
+                                                                       facialregion_code = facialregion_code, 
+                                                                       requesting_user = current_user)
+    return insertedSignatureRecordID
 
 
 @router.post("/", response_model=int, name="signature:create-new-record", status_code=HTTP_201_CREATED)

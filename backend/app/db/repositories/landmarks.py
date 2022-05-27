@@ -90,16 +90,16 @@ class LandmarksRepository(BaseRepository):
         return landmarkIDlist # [LandmarkInDB(**landmarkRecord) for landmarkRecord in landmarksRecords] 
 
 
-    async def get_landmarks_by_landmark_id(self, *, landmark_id: int, requesting_user: UserInDB) -> List[LandmarkInDB]:
+    async def get_landmarks_by_landmark_id(self, *, landmark_id: int, requesting_user: UserInDB) -> LandmarkInDB:
         """
             Returns landmarks corresponding to landmark_id, but only if owned by requesting user. 
             This could include, e.g., intial user annotations and computed landmarks.
         """               
-        landmarksRec = await self.db.fetch_all(query=GET_LANDMARKS_BY_LANDMARK_ID_QUERY, values={"landmark_id": landmark_id, "owner": requesting_user.id})
-        print('LANDMARKS..........................')
-        #landmarks.landmarks = json.loads(landmarks.landmarks)
-        for rec in landmarksRec:
-            print(tuple(rec.values()))  #TODO fix this!
+        landmarksRec = await self.db.fetch_one(query=GET_LANDMARKS_BY_LANDMARK_ID_QUERY, values={"landmark_id": landmark_id, "owner": requesting_user.id})
+        # print('LANDMARKS..........................')
+        # landmarks.landmarks = json.loads(landmarks.landmarks)
+        # for rec in landmarksRec:
+        #    print(tuple(rec.values()))  #TODO fix this!
             
         return LandmarkInDB(**landmarksRec)  #TODO The solution to fixing this mess includes getting the json data from the Postgres DB validated by Pydantic.
 
@@ -109,7 +109,7 @@ class LandmarksRepository(BaseRepository):
             Returns landmarks corresponding to landmark_id, but only if owned by requesting user. 
             Landmark field of landmark table only, no other metadata
         """               
-        landmarksRec = await self.db.fetch_all(query=GET_LANDMARKSTRING_ONLY_BY_LANDMARK_ID_QUERY, values={"landmark_id": landmark_id, "owner": requesting_user.id})
+        landmarksRec = await self.db.fetch_one(query=GET_LANDMARKSTRING_ONLY_BY_LANDMARK_ID_QUERY, values={"landmark_id": landmark_id, "owner": requesting_user.id})
 
         """
         for i,rec in enumerate(landmarksRec):
@@ -117,11 +117,16 @@ class LandmarksRepository(BaseRepository):
             print(rec.values())
             if (rec.values()=='landmarks'):
                 print(tuple(rec.values())) """ 
-            
+        if landmarksRec is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No landmark data found under this landmark ID.",
+            )                                       
         try:
-            landmarkResults = landmarksRec[0].values()
+            landmarkResults = landmarksRec[0] #.values()
         except IndexError:
-            return None            
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No landmark data found under this landmark ID (result set empty).",
+            )                
         return round_floats(json.loads( (''.join(tuple(landmarkResults))) ))
         
                        
