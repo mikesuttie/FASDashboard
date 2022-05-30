@@ -8,9 +8,7 @@ import cv2
 class FaceRenderPipeline:
     def __init__(self, imageDimension=512):
 
-        self.objReader = vtk.vtkOBJReader()         
-        #self.objReader.SetFileName('data/subjects/JWM5671.obj')         # TODO TODO TODO fix this! Use some dummy data?
-                        
+        self.objReader = vtk.vtkOBJReader()                                 
         self.texture = vtk.vtkTexture()        
 
         self.mapper = vtk.vtkPolyDataMapper()
@@ -30,8 +28,6 @@ class FaceRenderPipeline:
         renderWindow.SetOffScreenRendering(True)
         renderWindow.AddRenderer(self.renderer)        
 
-        #self.imageData = vtk.vtkImageData()
-
         self.windowToImageFilter = vtk.vtkWindowToImageFilter()
         self.windowToImageFilter.SetInput(renderWindow) # TODO: Does this construct a pipeline, or 'SetInputConnection' required?
         self.windowToImageFilter.SetInputBufferTypeToRGB()
@@ -45,21 +41,25 @@ class FaceRenderPipeline:
     def setCameraCoords(self, cameraCoords):
         self.renderer.GetActiveCamera().SetPosition(cameraCoords[0],cameraCoords[1],cameraCoords[2])
         
+        
     def setFocalPoint(self, focalPoint):
         self.renderer.GetActiveCamera().SetFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2])
         
+        
     def setRoll(self, roll):        
         self.renderer.GetActiveCamera().SetRoll(roll)
+        
                 
     def loadMeshFromObjFile(self, meshFilePath):        
         self.objReader.SetFileName(meshFilePath) #TODO check success (catch) at time of rendering
         print('UPDATED OBJ READER: PATH:',meshFilePath)
         
+    """ # Unused    
     def loadTextureFromPngFile(self, textureFilePath):
         self.textureReader = vtk.vtkPNGReader()
         #textureFilePath='/home/rr/fasd/repos/FasdLandmarker/FasdLandmarker/data/subjects/JWM5671.png'
         self.textureReader.SetFileName(textureFilePath)
-
+    """
         
     def renderFrontalView(self,imageDimensions=512):
 
@@ -77,7 +77,7 @@ class FaceRenderPipeline:
         #px,py,pz,fx,fy,fz = 999,999,999,999,999,999
         #px,py,pz = cam.GetPosition()
         #fx,fy,fz = cam.GetFocalPoint()
-        print("(((((((((((((((((((((((((((cam.GetPosition() cam.GetFocalPoint()", cam.GetPosition(), cam.GetFocalPoint())
+        #print("cam.GetPosition() and cam.GetFocalPoint()", cam.GetPosition(), cam.GetFocalPoint())
 
         self.renderer.GetRenderWindow().SetSize(imageDimensions,imageDimensions)
         self.renderer.GetRenderWindow().Render()
@@ -92,22 +92,11 @@ class FaceRenderPipeline:
         components = vtkArray.GetNumberOfComponents()
 
         img = utils.vtkToNumpy(vtkImage)
-
-        # TODO: Layout of the output array dst is incompatible 
-        # .......... with cv::Mat (step[ndims-1] != elemsize or step[1] != elemsize*nchannels)
-        # ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB)
-        # channels = cv2.split(ycrcb)
-        # cv2.equalizeHist(channels[0], channels[0])
-        # cv2.merge(channels, ycrcb)
-        # cv2.cvtColor(ycrcb, cv2.COLOR_YCR_CB2BGR, img)
-        
        
         return img
         
-
-                
-    
-    # TODO note: almost duplicate of fct renderFrontalView()    
+                  
+    #  Note: almost duplicate of fct renderFrontalView()    
     def render2DView(self, focalPoint, cameraCoords,imageDimensions, roll=0, label=""):
 
         #print('RENDER2DVIEW:',focalPoint,cameraCoords)
@@ -151,8 +140,8 @@ class FaceRenderPipeline:
         cv2.merge(channels, ycrcb)
         cv2.cvtColor(ycrcb, cv2.COLOR_YCR_CB2BGR, np.array(img))
 
-        if label != "":
-            cv2.imwrite("faceSideViewTest_"+label+".png", img)
+        #if label != "":
+        #    cv2.imwrite("faceSideViewTest_"+label+".png", img)
 
         return img
         #numpy_support.vtk_to_numpy(vtkArray).reshape(height, width, components)

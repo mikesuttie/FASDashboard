@@ -188,8 +188,8 @@ class CNN2dLandmarker:
                     
                 doHistEq = False
                 if doHistEq:
-                    #print("EYEEEEEEEEEEEEEEE image shjape" , image[:,:,0].shape)
-                    imageio.imwrite('dbg_EyebeforeNormalize.png', image)     
+                    #print("EYE image shjape" , image[:,:,0].shape)
+                    #imageio.imwrite('dbg_EyebeforeNormalize.png', image)     
                     im_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                     
                     
@@ -201,7 +201,7 @@ class CNN2dLandmarker:
                     cv2.cvtColor(ycrcb, cv2.COLOR_YCR_CB2BGR, im_bgr)
                     
                     image = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2RGB)
-                    imageio.imwrite('dbg_EyeafterNormalize.png', image)                     
+                    #imageio.imwrite('dbg_EyeafterNormalize.png', image)                     
                     
                 test_images[0, :, :, :] = image/255.0  # normalize
 
@@ -210,8 +210,10 @@ class CNN2dLandmarker:
                 pred = self.eye_model.predict(test_images, batch_size=batch_size)
                 
                 for i,p in enumerate(pred):
-                    imageio.imwrite('dbg_Eyepredex'+str(i)+'.png', p[:, :, 0])
-                    imageio.imwrite('dbg_Eyepreden'+str(i)+'.png', p[:, :, 1])                                                          
+                    pass
+                    #imageio.imwrite('dbg_Eyepredex'+str(i)+'.png', p[:, :, 0])
+                    #imageio.imwrite('dbg_Eyepreden'+str(i)+'.png', p[:, :, 1])                                                          
+                
                 print("--- Eye detection time: ", time.time()-start)
                 
                 return extractEyeLandmarks(pred)
@@ -244,11 +246,11 @@ class CNN2dLandmarker:
                 no_channels = 3        
                 test_images = np.ndarray((1, image_heigt, image_width, no_channels), dtype=np.float32)
                 
-                imageio.imwrite('dbg_beforeNormalize.png', image)        
-                print("BNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNormalize: ", image.min(), image.max(), image[2][:,0].shape)                
+                #imageio.imwrite('dbg_beforeNormalize.png', image)        
+                #print("Normalize: ", image.min(), image.max(), image[2][:,0].shape)                
                 test_images[0, :, :, :] = preprocess_input(image/ 1.0, version=2)  # 'standardise'
-                imageio.imwrite('dbg_afterNormalize.png', test_images[0, :, :, :]) 
-                print("ANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNormalize: ", test_images[0, :, :, :].min(), test_images[0, :, :, :].max(), test_images[0, :, :, :][:,0].shape)
+                #imageio.imwrite('dbg_afterNormalize.png', test_images[0, :, :, :]) 
+                #print("Normalize: ", test_images[0, :, :, :].min(), test_images[0, :, :, :].max(), test_images[0, :, :, :][:,0].shape)
 
                 batch_size = 8
                 start = time.time()

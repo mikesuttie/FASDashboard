@@ -1,3 +1,5 @@
+from fastapi import HTTPException, status
+
 import dlib
 import cv2
 import os.path
@@ -11,9 +13,9 @@ def get_Dlib_68pt_faceLandmarkModel():
     https://stackoverflow.com/questions/36908402/dlib-training-shape-predictor-for-194-landmarks-helen-dataset
     http://sourceforge.net/projects/dclib/files/dlib/v18.10/shape_predictor_68_face_landmarks.dat.bz2
     """   
-    dlib_shape_predictor_filename = os.path.join("data","models","dlib",   "shape_predictor_68_face_landmarks.dat") # TODO: fix: this works only if current dir is src dir
-    if not os.path.exists(dlib_shape_predictor_filename):
-        raise ValueError
+    dlib_shape_predictor_filename = os.path.join("data","models","dlib", "shape_predictor_68_face_landmarks.dat") 
+    if not os.path.exists(dlib_shape_predictor_filename):        
+        return None
         
     predictor = dlib.shape_predictor(os.path.abspath(dlib_shape_predictor_filename))
 
@@ -31,10 +33,15 @@ def predictGenericLandmarks(predictor, image):
     detector = dlib.get_frontal_face_detector()
     rects = detector(grayScaleImage, 1)
 
-    # TODO improve error handling: case no face or multiple faces detected, or degenerate detection!
+    # Case no face or multiple faces detected, or degenerate detection!
     if(len(rects)!=1):
-        return
-    print('DLIB RECTS PREDICTED:', rects)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Dlib face detector did not detect exactly one face. Rectangles: " + str(rects),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    #print('DLIB RECTS PREDICTED:', rects)
+    
     shape = predictor(grayScaleImage, rects[0])    
     shape = face_utils.shape_to_np(shape)
 
@@ -66,7 +73,8 @@ def predictGenericLandmarks(predictor, image):
         "lower_lip_centre": [shape.item((57, 0)), shape.item((57, 1))], 
         "lip_centre": [shape.item((51, 0)), shape.item((51, 1))
         
-        #Still missing landmarks:  ear_attachment 2x, tragion 2x, pronasale
+        # Landmarks still missing (to be contributed by subsequent detectors): 
+        #    ear_attachment 2x, tragion 2x, pronasale
         ]
     }
 

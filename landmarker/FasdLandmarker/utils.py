@@ -1,3 +1,12 @@
+import vtk
+import numpy as np
+from vtk.util import numpy_support
+
+"""
+Utility functions for geometry data type conversion
+"""
+
+
 # MS: annoyingly vtk messes up obj loading if there is any marerial ifo from H1 cameras
 def RemoveOBJMaterial(file):
     try:
@@ -24,12 +33,6 @@ def EqualizeIntensity(imageFilename):
     return img
 """
 
-
-
-
-import vtk
-import numpy as np
-from vtk.util import numpy_support
 
 # from https://stackoverflow.com/questions/25230541/how-to-convert-a-vtkimage-into-a-numpy-array
 # .. correction for opencv BGR byte order

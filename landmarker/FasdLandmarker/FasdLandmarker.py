@@ -1,5 +1,7 @@
+from fastapi import HTTPException, status
+
 import numpy as np
-import os.path #TODO remove if need to process files dropped
+import os.path # Remove if need to process files dropped!
 
 import utils
 import geometryUtils
@@ -19,35 +21,12 @@ class FasdLandmarker:
     def setMeshFile(self, meshFilePath):
         print('Loading mesh file: ', meshFilePath)
         self.renderPipeline.loadMeshFromObjFile(str(meshFilePath))
-    
-    
-    def setMesh(self, mesh=None):  
-       
-        #TODO write mesh to file, e.g., use 
-        # https://docs.python.org/dev/library/tempfile.html#tempfile.NamedTemporaryFile  ?
-        if mesh is None:
-            meshFilePath = os.path.join("data","subjects", "SMS64.obj")# JWM5671.obj") # TODO
-            meshFilePath = os.path.join("data","subjects", "JWM5671.obj") 
-            if not os.path.exists(meshFilePath):
-                raise ValueError 
-            self.renderPipeline.loadMeshFromObjFile(meshFilePath)    
-            print('LOADED mesh at', meshFilePath)               
+
               
     def setTexture(self, texture): #texture: RGB image as numpy array
+        ImageData = utils.numpyToVtkImageData(texture)            
+        self.renderPipeline.texture.SetInputDataObject(ImageData)
 
-        #TODO write texture to file?
-        #textureFilePath = '' # TODO ... 
-        if texture is None:
-            textureFilePath = os.path.join("data","subjects", "JWM5671.png") 
-            print('Loading texture file ' , textureFilePath)
-            if not os.path.exists(textureFilePath):
-                raise ValueError 
-            self.renderPipeline.loadTextureFromPngFile(textureFilePath)            
-            
-        else: # NP array expected
-            print('LOADING TEXTURE FROM NUMPY ARRAY')
-            ImageData = utils.numpyToVtkImageData(texture)            
-            self.renderPipeline.texture.SetInputDataObject(ImageData)
 
     def initialiseRenderView(self):
         pass
@@ -58,15 +37,27 @@ class FasdLandmarker:
     # Computes generic landmarks, using a 68point dlib model by default.
     def computeInitial2DLandmarks(self):
         frontalViewImage = self.renderPipeline.renderFrontalView()
+        if self.dlibLandmarkPredictor is None:        
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Landmarking server could not load facial landmark detection model from path data/models/dlib/shape_predictor_68_face_landmarks.dat",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
         if frontalViewImage is not None:
             detectedLandmarks = GenericLandmarker.predictGenericLandmarks(\
                 self.dlibLandmarkPredictor, frontalViewImage)
-            self.dlib68LandmarkVisualisation = GenericLandmarker.drawLandmarksIntoImage(\
-                frontalViewImage,detectedLandmarks)
+            #self.dlib68LandmarkVisualisation = GenericLandmarker.drawLandmarksIntoImage(\
+            #    frontalViewImage,detectedLandmarks)
             return detectedLandmarks, frontalViewImage
         else:
             print('N O   F R O N T A L  V I E W    R E N D E R E D!!!!')
-            return
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No frontal face view available for computing initial 2D landmarks.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
 
 
 

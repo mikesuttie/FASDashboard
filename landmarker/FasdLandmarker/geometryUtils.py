@@ -5,6 +5,15 @@ def getLength(p):
     return float(math.sqrt(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]))
 
 
+def isCloseby3D(landmark1, landmark2, tolerance = 2.0):
+
+    d0 = landmark1[0]-landmark2[0]
+    d1 = landmark1[1]-landmark2[1]
+    d2 = landmark1[2]-landmark2[2]    
+
+    return d0 * d0 + d1 * d1 + d2 * d2 < tolerance * tolerance
+
+
 def normalize(point):
     length = getLength(point)
     if (length != 0.0):
