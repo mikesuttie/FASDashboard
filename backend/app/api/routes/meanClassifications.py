@@ -13,7 +13,7 @@ from app.api.dependencies.meanClassifications import get_meanClassification_by_l
 router = APIRouter()
 
 
-@router.get("/{landmark_id}", response_model=MeanClassificationPublic, name="meanClassifications:get-meanClassifications-by-landmark-id")
+@router.get("/{landmark_id}", response_model=List[MeanClassificationPublic], name="meanClassifications:get-meanClassifications-by-landmark-id")
 async def get_meanClassifications_by_landmark_id(
     landmark_id: int = Path(..., ge=1),
     current_user: UserInDB = Depends(get_current_active_user),
@@ -39,17 +39,21 @@ async def create_meanClassificationsRecord(
     return created_meanClassificationRecord
     
 
-@router.post("/compute/{landmark_id}", name="meanClassifications:trigger-computation", status_code=HTTP_201_CREATED)
+# Invoke computation of meanClassification record. Returns meanClassificationRecord ID.
+@router.post("/compute/{landmark_id}", response_model=MeanClassificationInDB, name="meanClassifications:trigger-computation", status_code=HTTP_201_CREATED)
 async def trigger_MeanClassificationscomputation_by_landmark_id(
+    meanClassificationmodel_name: str = "CAUC16pt",
+    facialregion_code: str = "Face",     
     landmark_id: int = Path(..., ge=1, title="Landmark ID."),
-    current_user: UserInDB = Depends(get_current_active_user)
+    current_user: UserInDB = Depends(get_current_active_user),
+    meanClassification_repo: MeanClassificationRepository = Depends(get_repository(MeanClassificationRepository))
 ):
-        
-    #TODO Exectute classification (msNormalization tools) through Swig Python wrapper interface.
-    raise HTTPException(
-        status_code=HTTP_404_NOT_FOUND, 
-        detail="MeanClassifications computation module currently not connected to compute server. Store directly through alternative POST endpoint",
-    )
+            
+    insertedMeanClassificationRecordID = await meanClassification_repo.compute_meanClassication(landmark_id = landmark_id, 
+                                                                                       meanClassificationmodel_name = meanClassificationmodel_name, 
+                                                                                       facialregion_code = facialregion_code, 
+                                                                                       requesting_user = current_user)
+    return insertedMeanClassificationRecordID
     
 
 @router.delete(

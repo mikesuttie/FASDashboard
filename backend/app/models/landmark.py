@@ -8,7 +8,7 @@ from app.models.user import UserPublic
 class LandmarkBase(CoreModel):
     facescan_id: Optional[int]
     landmarksetcode: Optional[str]
-    landmarks: Optional[Json]
+    landmarks: Optional[str] #Json #It appears, the PostGres json type converts to str in SQL query. Also, see l.19
 
 
 class LandmarkCreate(LandmarkBase):
@@ -16,7 +16,7 @@ class LandmarkCreate(LandmarkBase):
     landmarksetcode: str    
     algorithm: str
     computationstatus: str
-    landmarks: Json
+    landmarks: str #Json 
     owner: int
 
 

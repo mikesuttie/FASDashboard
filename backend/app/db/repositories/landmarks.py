@@ -96,12 +96,13 @@ class LandmarksRepository(BaseRepository):
             This could include, e.g., intial user annotations and computed landmarks.
         """               
         landmarksRec = await self.db.fetch_one(query=GET_LANDMARKS_BY_LANDMARK_ID_QUERY, values={"landmark_id": landmark_id, "owner": requesting_user.id})
-        # print('LANDMARKS..........................')
-        # landmarks.landmarks = json.loads(landmarks.landmarks)
-        # for rec in landmarksRec:
-        #    print(tuple(rec.values()))  #TODO fix this!
-            
-        return LandmarkInDB(**landmarksRec)  #TODO The solution to fixing this mess includes getting the json data from the Postgres DB validated by Pydantic.
+
+        if landmarksRec is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No landmark data found under this landmark ID.",
+            )  
+
+        return LandmarkInDB(**landmarksRec)
 
 
     async def get_landmarkstringonly_by_landmark_id(self, *, landmark_id: int, requesting_user: UserInDB) -> str:
@@ -135,19 +136,25 @@ class LandmarksRepository(BaseRepository):
     
 
     async def get_detected_landmarks_on_facescan(self, *, texture, mesh) -> dict:
-        """ Forwards to landmarkingserver streams of texture and mesh from database. """
+        """ Forward to landmarkingserver: streams of texture and mesh from database. """
         headGeometryData = [('faceFiles',mesh), ('faceFiles',texture)]
         try:
-            r = httpx.post("http://landmarkingserver:7998/detectLandmarks/", files=headGeometryData, timeout=100.0)                
+            r = httpx.post("http://landmarkingserver:7998/detectLandmarks/", files=headGeometryData, timeout=100.0)     
+        except httpx.ReadTimeout:
+            print("Connection to landmarkingserver timed out!")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Landmarking server connection timeout. Automatic landmarking failed.",
+            )                                       
         except httpx.ConnectError:
             print("Connection refused to landmarkingserver!")
-        """
-        try:
-            s = httpx.get("http://facescreenprocessor:34568/", timeout=1.0)                
-            print( s.json())
-        except httpx.ConnectError:
-            print("Connection refused to facescreenprocessor!")
-        """
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=
+"Landmarking server may not be running: Connection refused! \
+This is most likely an issue with the X virtual framebuffer (xvfb). \
+Xvfb is required by VTK for rendering intermediate views for landmarking. \
+Try (potentially multiple times) the following on the backends' command \
+line interface: docker-compose restart landmarkingserver",
+            )                                                   
 
         return r.json()
         

@@ -279,6 +279,7 @@ def create_meanClassificationResults_table() -> None:
         sa.Column("stderror", sa.Float, nullable=False),
         sa.Column("neg_class", sa.Text, nullable=True),
         sa.Column("pos_class", sa.Text, nullable=True),        
+        sa.Column("owner", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),                  
         *timestamps()
     )
     op.execute(
