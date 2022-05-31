@@ -7,21 +7,26 @@ from pydantic import Json
 
 class MeanClassificationBase(CoreModel):
     landmark_id: Optional[int]
+    modelname: Optional[str]
+    facialregion: Optional[str]    
     meanvalue: Optional[float]
     stderror: Optional[float]    
+    neg_class: Optional[str]    
+    pos_class: Optional[str]    
 
 
 class MeanClassificationCreate(MeanClassificationBase):
     landmark_id: int
+    modelname: str
+    facialregion: str
     meanvalue: float
     stderror: float    
+    neg_class: str
+    pos_class: str
 
 
 class MeanClassificationInDB(IDModelMixin, DateTimeModelMixin, MeanClassificationBase):
     id: Optional[int]
-    landmark_id: Optional[int]
-    meanvalue: Optional[float]
-    stderror: Optional[float]    
     owner: int
 
 

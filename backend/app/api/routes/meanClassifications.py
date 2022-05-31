@@ -8,7 +8,7 @@ from app.models.meanClassification import MeanClassificationCreate, MeanClassifi
 from app.db.repositories.meanClassifications import MeanClassificationRepository
 from app.api.dependencies.database import get_repository
 from app.api.dependencies.auth import get_current_active_user
-from app.api.dependencies.meanClassifications import get_meanClassification_by_landmark_id_from_path, check_meanClassification_modification_permissions
+from app.api.dependencies.meanClassifications import get_meanClassification_by_id_from_path, check_meanClassification_modification_permissions
 
 router = APIRouter()
 
@@ -43,7 +43,7 @@ async def create_meanClassificationsRecord(
 @router.post("/compute/{landmark_id}", response_model=MeanClassificationInDB, name="meanClassifications:trigger-computation", status_code=HTTP_201_CREATED)
 async def trigger_MeanClassificationscomputation_by_landmark_id(
     meanClassificationmodel_name: str = "CAUC16pt",
-    facialregion_code: str = "Face",     
+    facialregion_code: str = "FACE",     
     landmark_id: int = Path(..., ge=1, title="Landmark ID."),
     current_user: UserInDB = Depends(get_current_active_user),
     meanClassification_repo: MeanClassificationRepository = Depends(get_repository(MeanClassificationRepository))
@@ -57,14 +57,15 @@ async def trigger_MeanClassificationscomputation_by_landmark_id(
     
 
 @router.delete(
-    "/{meanClassificationRecord_id}/",
-    response_model=int,
-    name="meanClassificationResult:delete-by-landmark-id",
+    "/{id}/", #meanClassificationRecord_id
+    response_model=int  ,
+    name="meanClassificationResult:delete-by-id",
     dependencies=[Depends(check_meanClassification_modification_permissions)],
 )
 async def delete_meanClassificationRecord_by__landmark_id(
-    meanClassificationRecord: MeanClassificationInDB = Depends(get_meanClassification_by_landmark_id_from_path),
+    meanClassificationRecord: MeanClassificationInDB = Depends(get_meanClassification_by_id_from_path),
     meanClassifications_repo: MeanClassificationRepository = Depends(get_repository(MeanClassificationRepository)),
+    current_user: UserInDB = Depends(get_current_active_user),    
 ) -> int:
-    return await meanClassifications_repo.delete_meanclassification_by_id(meanClassificationRecord=meanClassificationRecord)
+    return await meanClassifications_repo.delete_meanclassification_by_id(meanclassificationRecord=meanClassificationRecord, requesting_user=current_user)
     
